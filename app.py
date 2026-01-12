@@ -7,8 +7,20 @@ import plotly.figure_factory as ff
 # --- FUNGSI LOAD DATA ---
 def load_data(file):
     if file is not None:
-        return pd.read_csv(file, header=None).values
-    # Default data jika user belum upload
+        # Membaca CSV dan mengesan jika ada header
+        df = pd.read_csv(file)
+        
+        # Buang kolum pertama jika ia mengandungi teks (seperti Job ID)
+        if df.iloc[:, 0].dtype == object:
+            df = df.iloc[:, 1:]
+            
+        # Tukar semua data kepada nombor, jika ada error (teks), ia jadi NaN
+        df = df.apply(pd.to_numeric, errors='coerce')
+        
+        # Buang baris/kolum yang ada NaN
+        return df.dropna().values
+    
+    # Data default jika tiada file
     return np.array([[10, 20, 5, 15], [8, 12, 20, 10], [15, 5, 10, 25]])
 
 # --- LOGIK EVOLUTIONARY STRATEGIES (ES) ---
