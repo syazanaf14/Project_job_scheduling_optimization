@@ -92,9 +92,40 @@ if st.button("Start ES Optimization"):
     ax.set_ylabel("Makespan Time")
     st.pyplot(fig)
 
-    # 3. Gantt Chart (Visual Jadual) [cite: 20]
+    # 3. Gantt Chart (Visual Jadual)
     st.subheader("📅 Optimized Gantt Chart")
-    df_gantt = []
-    # Logik bina data untuk Gantt Chart...
-    # (Kod Gantt disingkatkan untuk kemudahan)
-    st.info("Gantt Chart menunjukkan susunan kerja mesin yang paling efisien berdasarkan dataset real anda.")
+    
+    # Bina data untuk Plotly Gantt
+    gantt_data = []
+    finish_times = np.zeros((raw_data.shape[0], raw_data.shape[1]))
+    
+    for m in range(raw_data.shape[0]):
+        for j in range(raw_data.shape[1]):
+            job_idx = best_seq[j]
+            p_time = raw_data[m, job_idx]
+            
+            # Kira Start & Finish Time
+            if m == 0 and j == 0: start = 0
+            elif m == 0: start = finish_times[m, j-1]
+            elif j == 0: start = finish_times[m-1, j]
+            else: start = max(finish_times[m-1, j], finish_times[m, j-1])
+            
+            end = start + p_time
+            finish_times[m, j] = end
+            
+            gantt_data.append(dict(
+                Task=f"Machine {m+1}", 
+                Start=start, 
+                Finish=end, 
+                Resource=f"Job {job_idx+1}"
+            ))
+
+    # Visualisasi menggunakan Plotly
+    df_plot = pd.DataFrame(gantt_data)
+    # Tukar angka kepada format 'time' untuk plotly (dummy date)
+    df_plot['Start'] = pd.to_datetime(df_plot['Start'], unit='m', origin='2026-01-01')
+    df_plot['Finish'] = pd.to_datetime(df_plot['Finish'], unit='m', origin='2026-01-01')
+
+    fig_gantt = ff.create_gantt(df_plot, index_col='Resource', show_colorbar=True, 
+                                group_tasks=True, showgrid_x=True, title="")
+    st.plotly_chart(fig_gantt, use_container_width=True)
