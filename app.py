@@ -66,7 +66,7 @@ def run_es(data, mu, sigma, generations):
 # --- STREAMLIT UI ---
 st.set_page_config(page_title="ES Scheduling Optimizer", layout="wide")
 st.title("⚙️ Evolutionary Strategies (ES) for Job Scheduling")
-st.write("Bahagian ini fokus pada **Self-Adaptation** dan **Mutation** untuk mengoptimumkan Makespan[cite: 13].")
+st.write("Bahagian ini fokus pada **Self-Adaptation** dan **Mutation** untuk mengoptimumkan Makespan.")
 
 # Sidebar Parameter 
 st.sidebar.header("Algorithmic Parameters")
