@@ -127,18 +127,6 @@ if st.button("Start Multi-Objective For ES Optimization"):
     c3.metric("Total Machine Idle Time", f"{t_idle} mins")
     
     st.success(f"**Best Sequence Found:** {best_seq}")   
-    with c1:
-        st.metric("Optimized Makespan", f"{makespan_final} mins")
-        st.caption(f"Weight: {w_m}")
-
-    with c2:
-        st.metric("Total Waiting Time", f"{t_wait} mins")
-        st.caption(f"Weight: {w_w}")
-
-    with c3:
-        st.metric("Total Idle Time", f"{t_idle} mins")
-        st.caption(f"Weight: {w_i}")
-
     
     # 2. Convergence Plot Graph
     st.subheader("📈 Convergence Analysis (Weighted Fitness)")
