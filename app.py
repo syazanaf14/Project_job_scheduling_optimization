@@ -4,7 +4,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import plotly.figure_factory as ff
 
-# --- FUNGSI LOAD DATA ---
+# --- FUNGSI LOAD DATA CSV---
 def load_data(file):
     if file is not None:
         df = pd.read_csv(file)
@@ -87,7 +87,7 @@ gen_val = st.sidebar.slider("Generations", 10, 500, 100)
 
 # --- TAMBAHAN: TOGGLE WEIGHTS UNTUK MULTI-OBJECTIVE ---
 st.sidebar.header("Objective Weights")
-st.sidebar.info("Tentukan kepentingan setiap objektif (Jumlah = 1.0 disarankan)")
+st.sidebar.info("Multi-Objective Weights (Σ ≤ 1)")
 w_m = st.sidebar.slider("Weight: Makespan", 0.0, 1.0, 0.7)
 w_w = st.sidebar.slider("Weight: Job Waiting Time", 0.0, 1.0, 0.2)
 w_i = st.sidebar.slider("Weight: Machine Idle Time", 0.0, 1.0, 0.1)
@@ -111,7 +111,7 @@ if st.button("Start Multi-Objective For ES Optimization"):
             f_times[m, j] = st_time + raw_data[m, idx]
 
     # 1. Metrics Display
-    st.subheader("📊 Keputusan Optimasi")
+    st.subheader("📊 The Result:")
 
     # Kira komponen secara berasingan untuk paparan
     # (Logik ini sama seperti dalam run_es)
