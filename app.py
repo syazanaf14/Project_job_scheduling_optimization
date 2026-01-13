@@ -111,13 +111,35 @@ if st.button("Start Multi-Objective For ES Optimization"):
             f_times[m, j] = st_time + raw_data[m, idx]
 
     # 1. Metrics Display
+    st.subheader("📊 Keputusan Optimasi")
+
+    # Kira komponen secara berasingan untuk paparan
+    # (Logik ini sama seperti dalam run_es)
+    makespan_final = f_times[-1, -1]
+
+    # Paparkan Total Fitness Value dalam kotak besar (Highlight)
+    st.info(f"### **Total Fitness Value: {best_fitness:.2f}**")
+    st.write("*(Nilai ini adalah gabungan ketiga-tiga objektif berdasarkan pemberat/weight yang anda tetapkan)*")
+    
     c1, c2, c3 = st.columns(3)
     c1.metric("Optimized Makespan", f"{f_times[-1,-1]} mins")
     c2.metric("Total Waiting Time", f"{t_wait} mins")
     c3.metric("Total Machine Idle Time", f"{t_idle} mins")
     
-    st.success(f"**Best Sequence Found:** {best_seq}")
+    st.success(f"**Best Sequence Found:** {best_seq}")   
+    with c1:
+        st.metric("Optimized Makespan", f"{makespan_final} mins")
+        st.caption(f"Weight: {w_m}")
 
+    with c2:
+        st.metric("Total Waiting Time", f"{t_wait} mins")
+        st.caption(f"Weight: {w_w}")
+
+    with c3:
+        st.metric("Total Idle Time", f"{t_idle} mins")
+        st.caption(f"Weight: {w_i}")
+
+    
     # 2. Convergence Plot Graph
     st.subheader("📈 Convergence Analysis (Weighted Fitness)")
     fig, ax = plt.subplots()
