@@ -92,4 +92,62 @@ gen_val = st.sidebar.slider("Generations", 10, 500, 100)
 
 st.sidebar.header("Objective Weights")
 w_m = st.sidebar.slider("Weight: Makespan", 0.0, 1.0, 0.5)
-w_w = st.sidebar.slider("Weight:
+w_w = st.sidebar.slider("Weight: Job Waiting Time", 0.0, 1.0, 0.2)
+w_i = st.sidebar.slider("Weight: Machine Idle Time", 0.0, 1.0, 0.3)
+
+if st.button("Start Multi-Objective For ES Optimization"):
+    raw_data = load_data(uploaded_file)
+    hist, best_seq, best_fitness, data = run_es(raw_data, mu_val, sigma_val, gen_val, w_m, w_w, w_i)
+
+    # Kira semula data akhir untuk paparan
+    nj, nm = data.shape
+    f_times = np.zeros((nm, nj))
+    t_wait, t_idle = 0, 0
+    
+    for m in range(nm):
+        for j in range(nj):
+            idx = best_seq[j]
+            st_t = 0 if (m==0 and j==0) else (f_times[m,j-1] if m==0 else (f_times[m-1,j] if j==0 else max(f_times[m-1,j], f_times[m,j-1])))
+            if m > 0: t_wait += (st_t - f_times[m-1, j])
+            if j > 0: t_idle += (st_t - f_times[m, j-1])
+            f_times[m, j] = st_t + data[idx, m]
+
+    # --- Metrics Display ---
+    st.subheader("📊 Hasil Keputusan")
+    st.info(f"### **Total Fitness Value: {best_fitness:.2f}**")
+    
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Optimized Makespan", f"{f_times[-1,-1]} mins")
+    c2.metric("Total Waiting Time", f"{t_wait} mins")
+    c3.metric("Total Machine Idle Time", f"{t_idle} mins")
+    
+    # Paparan Urutan Job
+    job_display = [f"Job {i+1}" for i in best_seq]
+    st.success(f"✅ **Urutan Pemprosesan Terbaik:** {' → '.join(job_display)}")   
+    
+    # --- Convergence Plot ---
+    st.subheader("📈 Analisis Konvergens")
+    fig, ax = plt.subplots()
+    ax.plot(hist, color='green', linewidth=2)
+    ax.set_xlabel("Generasi")
+    ax.set_ylabel("Nilai Fitness")
+    st.pyplot(fig)
+
+    # --- Gantt Chart ---
+    st.subheader("📅 Gantt Chart (10 Machines x 5 Jobs)")
+    gantt_data = []
+    for m in range(nm):
+        for j in range(nj):
+            idx = best_seq[j]
+            p_time = data[idx, m]
+            st_t = 0 if (m==0 and j==0) else (f_times[m,j-1] if m==0 else (f_times[m-1,j] if j==0 else max(f_times[m-1,j], f_times[m,j-1])))
+            en_t = st_t + p_time
+            gantt_data.append(dict(Task=f"Machine {m+1}", Start=st_t, Finish=en_t, Resource=f"Job {idx+1}"))
+
+    df_plot = pd.DataFrame(gantt_data)
+    df_plot['Start'] = pd.to_datetime(df_plot['Start'], unit='m', origin='2026-01-01')
+    df_plot['Finish'] = pd.to_datetime(df_plot['Finish'], unit='m', origin='2026-01-01')
+    
+    fig_gantt = ff.create_gantt(df_plot, index_col='Resource', show_colorbar=True, group_tasks=True, showgrid_x=True)
+    fig_gantt.update_yaxes(autorange="reversed") # Mesin 1 di atas, Mesin 10 di bawah
+    st.plotly_chart(fig_gantt, use_container_width=True)
